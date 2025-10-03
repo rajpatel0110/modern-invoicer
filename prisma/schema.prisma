@@ -1,0 +1,65 @@
+// prisma/schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql" // Changed from "sqlite"
+  url      = env("DATABASE_URL") // Changed to use environment variable for production
+}
+
+model User {
+  id               Int      @id @default(autoincrement())
+  username         String   @unique
+  password         String
+  email            String?  @unique
+  
+  // User Profile Details
+  companyName      String?
+  companyLogoUrl   String?
+  companyAddress   String?
+  contactPhone     String?
+  contactWebsite   String?
+  taxPanNumber     String?
+  taxGstin         String?
+  paymentDetails   String? // Storing payment details as a JSON string
+  itemTableHeaders String? // For customizable invoice table headers
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  clients          Client[]
+}
+
+model Client {
+  id              Int       @id @default(autoincrement())
+  user            User      @relation(fields: [userId], references: [id])
+  userId          Int
+  fullName        String
+  email           String
+  phoneNumber     String?
+  billingAddress  String
+  tradeName       String?
+  clientPanNumber String?
+  clientGstin     String?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  invoices        Invoice[]
+}
+
+model Invoice {
+  id            Int       @id @default(autoincrement())
+  client        Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
+  clientId      Int
+  referenceName String
+  invoiceNumber String
+  invoiceType   String
+  status        String   // DRAFT, SENT, PAID, OVERDUE
+  invoiceDate   DateTime
+  dueDate       DateTime? // Optional
+  lineItems     String   // Storing line items as a JSON string
+  discount      Float?
+  taxRate       Float?
+  previousDues  Float?
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
