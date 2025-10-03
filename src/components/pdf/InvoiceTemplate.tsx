@@ -3,12 +3,13 @@ import React from 'react';
 import { Page, Text, View, StyleSheet, Image, Font, Svg, Path } from '@react-pdf/renderer';
 import { SanitizedInvoice, SanitizedUser } from '@/lib/pdf-utils';
 
-// --- Font Registration ---
+// --- Font Registration (FIXED) ---
+// Switched to HTTPS to prevent "Mixed Content" errors in production.
 Font.register({
   family: 'Roboto',
   fonts: [
-    { src: 'http://fonts.gstatic.com/s/roboto/v16/zN7GBFwfMP4uA6AR0HCoLQ.ttf' },
-    { src: 'http://fonts.gstatic.com/s/roboto/v16/bdHGHleUa-ndQCOrdpfxfw.ttf', fontWeight: 'bold' },
+    { src: 'https://fonts.gstatic.com/s/roboto/v16/zN7GBFwfMP4uA6AR0HCoLQ.ttf' },
+    { src: 'https://fonts.gstatic.com/s/roboto/v16/bdHGHleUa-ndQCOrdpfxfw.ttf', fontWeight: 'bold' },
   ]
 });
 
@@ -280,14 +281,14 @@ export const InvoiceTemplate: React.FC<TemplateProps> = ({ invoice, user }) => {
   const total = subtotalAfterDiscount + taxAmount + (invoice.previousDues || 0);
 
   const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-GB');
-  
+
   const headers = user.itemTableHeaders;
 
   return (
     <Page size="A4" style={styles.page}>
       {/* Watermark */}
       {user.companyLogoUrl && <Image src={user.companyLogoUrl} style={styles.watermark} />}
-      
+
       {/* Header */}
       <View style={styles.header}>
         <View style={styles.headerLeft}>
@@ -316,7 +317,8 @@ export const InvoiceTemplate: React.FC<TemplateProps> = ({ invoice, user }) => {
           <Text style={styles.clientDetails}>
             {invoice.client.billingAddress}{'\n'}
             Phone: {invoice.client.phoneNumber}{'\n'}
-            {invoice.client.clientGstin && `GSTIN: ${invoice.client.clientGstin}`}
+            {/* FIX: Wrapped conditional string in a Text component to prevent layout errors. */}
+            {invoice.client.clientGstin && <Text>GSTIN: {invoice.client.clientGstin}</Text>}
           </Text>
         </View>
         <View style={styles.invoiceInfo}>
